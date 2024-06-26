@@ -20,7 +20,9 @@ jobs:
       run: pip install --quiet --requirement .github/workflows/requirements.txt
     - name: Lint code
       run: |
-        flake8 --ignore=E501,E231 *.py
+        echo "Running flake8 linting..."
+        flake8 --ignore=E501,E231 .github/workflows/*.py
+        echo "Running pylint linting.........."
         pylint --disable=C0301 --disable=C0326 .github/workflows/*.py
     - name: Run unit tests
       run: |
