@@ -23,7 +23,7 @@ jobs:
         echo "Running flake8 linting..."
         flake8 --ignore=E501,E231 .github/workflows/*.py
         echo "Running pylint linting.........."
-        pylint --disable=C0301 --disable=C0326 .github/workflows/*.py
+        pylint --disable=C0301  .github/workflows/*.py
     - name: Run unit tests
       run: |
         python -m unittest discover -s tests -p ".github/workflows/*.py"
