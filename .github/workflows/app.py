@@ -1,7 +1,6 @@
 import unittest
 from app import APP
 
-
 class Tests(unittest.TestCase):
     """
     Basic tests for the application
@@ -20,6 +19,7 @@ class Tests(unittest.TestCase):
         res = self.app.get('/')
         self.assertEqual(res.status, '200 OK')
 
+    
     def test_404(self):
         """
         test_404: a request for /null shall return 404 NOT FOUND
