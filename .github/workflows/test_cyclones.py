@@ -3,20 +3,27 @@ from app import APP
 
 
 class CyclonesTests(unittest.TestCase):
-    
-    '''Tests for the Cyclones'''
+    """
+    Tests for the Cyclones
+    """
 
     def setUp(self):
-        '''Create a test client for the app'''
+        """
+        Create a test client for the app
+        """
         self.app = APP.test_client()
 
     def test_guid(self):
-        '''test_guid: a request for the guid shall return 200 OK'''
+        """
+        test_guid: a request for the guid shall return 200 OK
+        """
         res = self.app.get('/05024756-765e-41a9-89d7-1407436d9a58')
         self.assertEqual(res.status, '200 OK')
 
     def test_json(self):
-        '''test_json: a request for the guid shall return the defined JSON'''
+        """
+        test_json: a request for the guid shall return the defined JSON
+        """
         res = self.app.get('/05024756-765e-41a9-89d7-1407436d9a58')
         self.assertEqual(res.json, {
             "guid": "05024756-765e-41a9-89d7-1407436d9a58",
@@ -26,6 +33,7 @@ class CyclonesTests(unittest.TestCase):
             "nickname": "Cyclones",
             "school": "Iowa State University"
         })
+
 
 if __name__ == "__main__":
     unittest.main()
