@@ -7,12 +7,14 @@ class Tests(unittest.TestCase):
     Basic tests for the application
     """
 
+    
     def setUp(self):
         """
         Create a test client for the app
         """
         self.app = APP.test_client()
 
+    
     def test_200(self):
         """
         test_200: a request for / shall return 200 OK
@@ -20,6 +22,7 @@ class Tests(unittest.TestCase):
         res = self.app.get('/')
         self.assertEqual(res.status, '200 OK')
 
+    
     def test_404(self):
         """
         test_404: a request for /null shall return 404 NOT FOUND
