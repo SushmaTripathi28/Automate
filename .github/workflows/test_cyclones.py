@@ -1,7 +1,9 @@
 import unittest
 from app import APP
 
+
 class CyclonesTests(unittest.TestCase):
+    
     '''Tests for the Cyclones'''
 
     def setUp(self):
