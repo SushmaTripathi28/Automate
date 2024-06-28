@@ -23,6 +23,14 @@ jobs:
       run: |
         gcloud auth configure-docker
 
+    - name: Print Docker config
+      run: |
+        cat ~/.docker/config.json
+
+    - name: List Docker Repositories
+      run: |
+        gcloud container images list
+
     - name: Build Docker image
       run: |
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA .
