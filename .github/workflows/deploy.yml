@@ -37,7 +37,6 @@ jobs:
 
       - name: List Docker Repositories
         run: |
-          gcloud auth login
           gcloud container images list
 
       - name: Build Docker image
