@@ -37,6 +37,7 @@ jobs:
 
       - name: List Docker Repositories
         run: |
+          gcloud config set project ${PROJECT_ID}
           gcloud container images list
 
       - name: Build Docker image
