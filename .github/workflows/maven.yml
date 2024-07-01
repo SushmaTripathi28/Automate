@@ -1,36 +1,73 @@
-name: java maven-build and publish artifact
+name: Java Maven Build and Publish Artifact
+
 on: 
- push:
-   branches: ["main"]
- pull_request:
-   branches: ["main"]
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+
 jobs:
   build_test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
       - name: Set Up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version:  '17'
-          distribution:  "temurin"
+          java-version: '17'
+          distribution: 'temurin'
           cache: maven
-      - name: Build with MAVEN
+          
+      - name: Build with Maven
         run: mvn -B package --file pom.xml
-      
-  publish-job:
-     needs: build_test
-     runs-on: ubuntu-latest
-     steps: 
-     - uses: actions/checkout@v3
-     - uses: actions/setup-java@v3
-       with:
-        java-version: '17'
-        distribution: "temurin"
-     - run: mvn --batch-mode --update-snapshots verify
-     - run: mkdir staging && cp target/*.jar staging
-     - uses: actions/upload-artifact@v3
-       with:
-         name: package
-         path: staging     
-   
+
+  publish_job:
+    needs: build_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set Up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Verify and update snapshots with Maven
+        run: mvn --batch-mode --update-snapshots verify
+        
+      - name: Create staging directory and copy JAR files
+        run: mkdir -p staging && cp target/*.jar staging
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: staging
+
+  docker_build_and_push:
+    needs: publish_job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Log in to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          
+      - name: Configure Docker for Google Artifact Registry
+        run: |
+          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/Automate/my-image:latest .
+          docker push northamerica-northeast1-docker.pkg.dev/ayush-424308/Automate/my-image:latest
