@@ -65,6 +65,7 @@ jobs:
 
   create_and_deploy_gke:
     needs: docker_build_and_push
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
