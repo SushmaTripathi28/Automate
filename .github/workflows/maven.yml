@@ -100,10 +100,29 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Deploy to GKE
+      - name: Create or update deployment
         run: |
-          kubectl create deployment my-deployment --image=northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest || \
-          kubectl set image deployment/my-deployment my-container=northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-deployment
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: my-deployment
+            template:
+              metadata:
+                labels:
+                  app: my-deployment
+              spec:
+                containers:
+                - name: my-container
+                  image: northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+                  ports:
+                  - containerPort: 8080
+          EOF
 
       - name: Wait for deployment to stabilize
         run: |
