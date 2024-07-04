@@ -102,7 +102,7 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          kubectl apply -f deployment.yaml
+          kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
 
       - name: Check rollout status
         run: |
