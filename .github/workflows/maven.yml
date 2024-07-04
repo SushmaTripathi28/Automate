@@ -77,7 +77,7 @@ jobs:
 
       - name: Create GKE cluster
         run: |
-          gcloud container clusters create my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308
+          gcloud container clusters create my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --machine-type=e2-medium --num-nodes=1 --disk-size=20
 
       - name: Set up GKE credentials
         run: |
