@@ -2,7 +2,7 @@ name: Minimal Workflow Test
 
 on:
   push:
-    branches: ["uat1"]
+    branches: ["uat2"]
 
 jobs:
   test:
