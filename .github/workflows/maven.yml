@@ -100,6 +100,9 @@ jobs:
         with:
           version: 'latest'
 
+      - name: Delete existing deployment
+        run: kubectl delete deployment my-deployment || echo "Deployment does not exist"
+
       - name: Apply Kubernetes Deployment
         run: kubectl apply -f deployment.yaml
 
