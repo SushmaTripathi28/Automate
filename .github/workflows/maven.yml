@@ -56,7 +56,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest ./target
+          docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest .
           docker push northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
 
   create_and_deploy_gke:
