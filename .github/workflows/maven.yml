@@ -100,40 +100,42 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Create or update deployment
+      - name: Deploy to GKE
         run: |
-          cat <<EOF | kubectl apply -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: my-deployment
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: my-deployment
-            template:
-              metadata:
-                labels:
-                  app: my-deployment
-              spec:
-                containers:
-                - name: my-container
-                  image: northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
-                  ports:
-                  - containerPort: 8080
-          EOF
+          kubectl apply -f deployment.yaml
 
-      - name: Wait for deployment to stabilize
+      - name: Check rollout status
         run: |
-          kubectl rollout status deployment/my-deployment
+          kubectl rollout status deployment/my-deployment --timeout=600s
 
-      - name: Get pod logs
-        run: |
-          POD_NAME=$(kubectl get pods -l app=my-deployment -o jsonpath="{.items[0].metadata.name}")
-          kubectl logs $POD_NAME
-
-      - name: Describe pod
-        run: |
-          POD_NAME=$(kubectl get pods -l app=my-deployment -o jsonpath="{.items[0].metadata.name}")
-          kubectl describe pod $POD_NAME
+# Deployment YAML file: deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-deployment
+  template:
+    metadata:
+      labels:
+        app: my-deployment
+    spec:
+      containers:
+      - name: my-container
+        image: northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
