@@ -1,4 +1,4 @@
-name: Java Maven Build, Publish, and Deploy :-)
+name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Artifact Repository
         run: |
-          gcloud artifacts repositories create my-repo1 --repository-format=docker --location=northamerica-northeast1 --project=ayush-424308 || echo "Repository already exists"
+          gcloud artifacts repositories create my-repo1 --repository-format=docker --location=northamerica-northeast1 --project=ayush-424308
 
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -76,20 +76,14 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Add Google Cloud SDK distribution URI as a package source
-        run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-          sudo apt-get install -y apt-transport-https ca-certificates
-          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
-      - name: Update package list and install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Install gke-gcloud-auth-plugin
         run: |
           sudo apt-get update
           sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
       - name: Create GKE cluster
         run: |
-          gcloud container clusters create my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --machine-type=e2-medium --num-nodes=1 --disk-size=20 || echo "Cluster already exists"
+          gcloud container clusters create my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --machine-type=e2-medium --num-nodes=1 --disk-size=20
 
       - name: Set up GKE credentials
         run: |
@@ -104,3 +98,17 @@ jobs:
         run: |
           kubectl create deployment my-deployment --image=northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest || \
           kubectl set image deployment/my-deployment my-container=northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+
+      - name: Wait for deployment to stabilize
+        run: |
+          kubectl rollout status deployment/my-deployment
+
+      - name: Get pod logs
+        run: |
+          POD_NAME=$(kubectl get pods -l app=my-deployment -o jsonpath="{.items[0].metadata.name}")
+          kubectl logs $POD_NAME
+
+      - name: Describe pod
+        run: |
+          POD_NAME=$(kubectl get pods -l app=my-deployment -o jsonpath="{.items[0].metadata.name}")
+          kubectl describe pod $POD_NAME
