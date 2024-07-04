@@ -2,29 +2,30 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-deployment
+  labels:
+    app: my-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: my-deployment
+      app: my-app
   template:
     metadata:
       labels:
-        app: my-deployment
+        app: my-app
     spec:
       containers:
       - name: my-container
         image: northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ENV_VAR
+          value: "value"
         resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
           limits:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "500m"
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
