@@ -108,34 +108,3 @@ jobs:
         run: |
           kubectl rollout status deployment/my-deployment --timeout=600s
 
-# Deployment YAML file: deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: my-deployment
-  template:
-    metadata:
-      labels:
-        app: my-deployment
-    spec:
-      containers:
-      - name: my-container
-        image: northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
