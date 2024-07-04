@@ -1,10 +1,10 @@
-name: Java Maven Build and Publish Artifact
+name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
-    branches: ["dev"]
+    branches: ["uat"]
   pull_request:
-    branches: ["dev"]
+    branches: ["uat"]
 
 jobs:
   build_test:
@@ -62,3 +62,28 @@ jobs:
         run: |
           docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo/my-image:latest .
           docker push northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo/my-image:latest
+
+  deploy_to_gke:
+    needs: docker_build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          
+      - name: Set up GKE credentials
+        run: |
+          gcloud container clusters get-credentials my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+          
+      - name: Deploy to GKE
+        run: |
+          kubectl set image deployment/my-deployment my-container=northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo/my-image:latest
