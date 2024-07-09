@@ -120,7 +120,7 @@ jobs:
           kubectl get pods -o wide
           kubectl describe pod -l app=my-app
 
-      - name: Get logs from crashing pods
+      - name: Get logs from crashing  pods
         run: |
           kubectl logs -l app=my-app --all-containers=true --max-log-requests=10
           
