@@ -2,9 +2,9 @@ name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
-    branches: ["uat2"]
+    branches: ["uat3"]
   pull_request:
-    branches: ["uat2"]
+    branches: ["uat3"]
 
 jobs:
   build_test:
@@ -39,18 +39,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Configure Docker for Google Artifact Registry
-        run: |
-          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-
-      - name: Create Artifact Repository
-        run: |
-          gcloud artifacts repositories create my-repo1 --repository-format=docker --location=northamerica-northeast1 --project=ayush-424308 || echo "Repository already exists"
+      - name: Log in to JFrog Artifactory
+        run: echo "${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_API_KEY }}" | docker login ${{ secrets.JFROG_URL }} --username ${{ secrets.JFROG_USERNAME }} --password-stdin
 
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -60,8 +50,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+          docker build -t ${{ secrets.JFROG_URL }}/my-repo1/my-image:latest .
+          docker push ${{ secrets.JFROG_URL }}/my-repo1/my-image:latest
 
   create_and_deploy_gke:
     needs: docker_build_and_push
@@ -128,26 +118,4 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Delete Artifact Repository
-        run: |
-          gcloud artifacts repositories delete my-repo1 --location=northamerica-northeast1 --project=ayush-424308 --quiet || echo "Repository does not exist"
-
-      - name: Delete GKE Cluster
-        run: |
-          gcloud container clusters delete my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --quiet || echo "Cluster does not exist"
-
-      - name: Delete Docker Image from Artifact Registry
-        run: |
-          gcloud container images delete northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest --quiet || echo "Image does not exist"
-
-      - name: Delete Pods in Kubernetes
-        run: |
-          kubectl delete pods -l app=my-app || echo "Pods do not exist"
-
-      - name: Delete Deployment in Kubernetes
-        run: |
-          kubectl delete deployment my-deployment || echo "Deployment does not exist"
-
-      - name: Clean up repository clone
-        run: |
-          rm -rf $GITHUB_WORKSPACE
+      - name: Delete GKE Clu
