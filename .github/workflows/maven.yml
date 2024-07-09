@@ -2,9 +2,9 @@ name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
-    branches: ["uat3"]
+    branches: ["uat4"]
   pull_request:
-    branches: ["uat3"]
+    branches: ["uat4"]
 
 jobs:
   build_test:
@@ -41,9 +41,8 @@ jobs:
 
       - name: Log in to JFrog Artifactory
         run: |
-          echo "JFROG_URL: ${{ secrets.JFROG_URL }}"
           echo "Logging into JFrog..."
-          echo "${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_API_KEY }}" | docker login ${{ secrets.JFROG_URL }} --username ${{ secrets.JFROG_USERNAME }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${JFROG_URL} --username ${{ github.actor }} --password-stdin
 
       - name: Download artifact
         uses: actions/download-artifact@v2
