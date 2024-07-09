@@ -118,4 +118,22 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Delete GKE Clu
+      - name: Delete GKE Cluster
+        run: |
+          gcloud container clusters delete my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --quiet || echo "Cluster does not exist"
+
+      - name: Delete Docker Image from JFrog
+        run: |
+          docker rmi ${{ secrets.JFROG_URL }}/my-repo1/my-image:latest || echo "Image does not exist"
+
+      - name: Delete Pods in Kubernetes
+        run: |
+          kubectl delete pods -l app=my-app || echo "Pods do not exist"
+
+      - name: Delete Deployment in Kubernetes
+        run: |
+          kubectl delete deployment my-deployment || echo "Deployment does not exist"
+
+      - name: Clean up repository clone
+        run: |
+          rm -rf $GITHUB_WORKSPACE
