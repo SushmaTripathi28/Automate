@@ -2,9 +2,9 @@ name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
-    branches: ["uat2"]
+    branches: ["app"]
   pull_request:
-    branches: ["uat2"]
+    branches: ["app"]
 
 jobs:
   build_test:
@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Artifact Repository
         run: |
-          gcloud artifacts repositories create my-repo1 --repository-format=docker --location=northamerica-northeast1 --project=ayush-424308 || echo "Repository already exists"
+          gcloud artifacts repositories create my-repo1 --repository-format=docker --location=northamerica-northeast1 --project=peak-axiom-426310-b1 || echo "Repository already exists"
 
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -60,8 +60,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest
+          docker build -t northamerica-northeast1-docker.pkg.dev/peak-axiom-426310-b1/my-repo1/my-image:latest .
+          docker push northamerica-northeast1-docker.pkg.dev/peak-axiom-426310-b1/my-repo1/my-image:latest
 
   create_and_deploy_gke:
     needs: docker_build_and_push
@@ -89,11 +89,11 @@ jobs:
 
       - name: Create GKE cluster
         run: |
-          gcloud container clusters create my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --machine-type=e2-medium --num-nodes=1 --disk-size=20 || echo "Cluster already exists"
+          gcloud container clusters create cluster-1 --zone northamerica-northeast1-a --project peak-axiom-426310-b1 --machine-type=e2-medium --num-nodes=1 --disk-size=10 || echo "Cluster already exists"
 
       - name: Set up GKE credentials
         run: |
-          gcloud container clusters get-credentials my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308
+          gcloud container clusters get-credentials cluster-1 --zone northamerica-northeast1-a --project peak-axiom-426310-b1
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -118,36 +118,3 @@ jobs:
       - name: Rollout status of deployment
         run: kubectl rollout status deployment/my-deployment --timeout=600s
 
-  delete_resources:
-    runs-on: ubuntu-latest
-    needs: create_and_deploy_gke
-    if: always()
-    steps:
-      - name: Log in to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Delete Artifact Repository
-        run: |
-          gcloud artifacts repositories delete my-repo1 --location=northamerica-northeast1 --project=ayush-424308 --quiet || echo "Repository does not exist"
-
-      - name: Delete GKE Cluster
-        run: |
-          gcloud container clusters delete my-gke-cluster --zone northamerica-northeast1-a --project ayush-424308 --quiet || echo "Cluster does not exist"
-
-      - name: Delete Docker Image from Artifact Registry
-        run: |
-          gcloud container images delete northamerica-northeast1-docker.pkg.dev/ayush-424308/my-repo1/my-image:latest --quiet || echo "Image does not exist"
-
-      - name: Delete Pods in Kubernetes
-        run: |
-          kubectl delete pods -l app=my-app || echo "Pods do not exist"
-
-      - name: Delete Deployment in Kubernetes
-        run: |
-          kubectl delete deployment my-deployment || echo "Deployment does not exist"
-
-      - name: Clean up repository clone
-        run: |
-          rm -rf $GITHUB_WORKSPACE
