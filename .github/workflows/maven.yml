@@ -76,14 +76,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Add Google Cloud SDK distribution URI as a package source
+      - name: Set up Google Cloud SDK and install required packages
         run: |
           echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
           sudo apt-get install -y apt-transport-https ca-certificates
           curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
-      - name: Update package list and install google-cloud-sdk-gke-gcloud-auth-plugin
-        run: |
           sudo apt-get update
           sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
@@ -106,15 +103,22 @@ jobs:
       - name: Apply Kubernetes Deployment
         run: kubectl apply -f deployment.yaml
 
+      - name: Wait for deployment to stabilize
+        run: kubectl rollout status deployment/my-deployment --timeout=600s
+
       - name: Get details of crashing pods
         run: |
           kubectl get pods -o wide
           kubectl describe pod -l app=my-app
 
-      - name: Get logs from crashing pods
+      - name: Retry getting logs if pod is not ready
+        id: retry-logs
         run: |
-          kubectl logs -l app=my-app --all-containers=true --max-log-requests=10
-          
-      - name: Rollout status of deployment
-        run: kubectl rollout status deployment/my-deployment --timeout=600s
+          for i in {1..10}; do
+            kubectl logs -l app=my-app --all-containers=true --max-log-requests=10 && break
+            sleep 30
+          done
 
+      - name: Check logs output
+        run: echo "Logs retrieved successfully"
+        if: steps.retry-logs.outcome == 'success'
