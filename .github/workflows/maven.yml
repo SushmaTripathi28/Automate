@@ -97,14 +97,21 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Delete existing deployment
-        run: kubectl delete deployment my-deployment || echo "Deployment does not exist"
+      - name: Delete existing deployment if exists
+        run: |
+          kubectl delete deployment my-deployment || true
+          sleep 30 # Ensure the deployment is deleted before reapplying
 
       - name: Apply Kubernetes Deployment
-        run: kubectl apply -f deployment.yaml
+        run: |
+          kubectl apply -f deployment.yaml
 
       - name: Wait for deployment to stabilize
-        run: kubectl rollout status deployment/my-deployment --timeout=600s
+        run: |
+          for i in {1..10}; do
+            kubectl rollout status deployment/my-deployment --timeout=300s && break
+            sleep 30
+          done
 
       - name: Get details of crashing pods
         run: |
