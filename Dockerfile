@@ -14,4 +14,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s CMD curl -f http://l
 EXPOSE 8080
 
 # Run the application when the container starts
+#
 CMD ["java", "-jar", "/app/app.jar"]
