@@ -121,8 +121,8 @@ jobs:
       - name: Retry getting logs if pod is not ready
         id: retry-logs
         run: |
-          for i in {1..10}; do
-            kubectl logs -l app=my-app --all-containers=true --max-log-requests=10 && break
+          for i in {1..5}; do
+            kubectl logs -l app=my-app --all-containers=true --max-log-requests=10 --timeout=30s && break
             sleep 30
           done
 
