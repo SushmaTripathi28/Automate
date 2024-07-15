@@ -1,5 +1,6 @@
+
 # Use an official JDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+FROM openjdk:19-jdk
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -11,7 +12,7 @@ COPY target/gs-maven-0.1.0.jar /app/app.jar
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s CMD curl -f http://localhost:8080/health || exit 1
 
 # Expose the port that your application listens on
-EXPOSE 8080
+EXPOSE 80
 
 # Run the application when the container starts
 #
