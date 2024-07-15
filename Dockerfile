@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the JAR file into the Docker image
-COPY target/*.jar /app/app.jar
+COPY target/gs-maven-0.1.0.jar /app/app.jar
 
 # Health check to verify application readiness
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s CMD curl -f http://localhost:8080/health || exit 1
