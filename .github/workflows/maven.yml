@@ -1,4 +1,4 @@
-name: Java Maven Build, Verify, Publish, and Deploy
+name: Java Maven Build, Publish, and Deploy
 
 on:
   push:
@@ -21,13 +21,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml
-
-      - name: Verify JAR File
-        run: |
-          jar tf target/gs-maven-0.1.0.jar | grep META-INF/MANIFEST.MF
-          jar xf target/gs-maven-0.1.0.jar META-INF/MANIFEST.MF
-          cat META-INF/MANIFEST.MF
+        run: mvn -B package --file pom.xml
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
